@@ -1,0 +1,194 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://lorawan-schema.org/ts002/1-0/schema",
+  "title": "LoRaWAN Backend Interfaces 1.0",
+  "description": "Schema definitions for LoRaWAN Backend Interfaces 1.0",
+
+  "definitions": {
+    "dataRateIndex": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 15,
+      "description": "Data Rate Index"
+    },
+    "frequency": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Frequency (MHz)"
+    },
+    "pingSlotPeriod": {
+      "type": "integer",
+      "enum": [32, 64, 128, 256, 512, 1024, 2048, 4096],
+      "description": "Ping Slot Period (seconds)"
+    },
+    "rxDelay": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 15
+    },
+    "rxDataRateOffset": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 7
+    },
+    "deviceProfile": {
+      "title": "Device Profile",
+      "description": "End-Device capabilities and boot parameters that are needed by the Network Server",
+      "type": "object",
+      "properties": {
+        "DeviceProfileID": {
+          "type": "string",
+          "description": "ID of the Device Profile"
+        },
+        "SupportsClassB": {
+          "type": "boolean",
+          "description": "End-Device supports class B"
+        },
+        "ClassBTimeout": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Maximum delay for the End-Device to answer a MAC request or confirmed DL frame (seconds)"
+        },
+        "PingSlotPeriod": { "$ref": "#/definitions/pingSlotPeriod" },
+        "PingSlotDR": { "$ref": "#/definitions/dataRateIndex" },
+        "PingSlotFrequency": { "$ref": "#/definitions/frequency" },
+        "SupportsClassC": {
+          "type": "boolean",
+          "description": "End-Device supports class C"
+        },
+        "ClassCTimeout": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Maximum delay for the End-Device to answer a MAC request or confirmed DL frame (seconds)"
+        },
+        "MACVersion": {
+          "type": "string",
+          "examples": ["1.0.2"],
+          "description": "Version of the LoRaWAN supported by the End-Device"
+        },
+        "RegParamsRevision": {
+          "type": "string",
+          "examples": ["B"],
+          "description": "Revision of the Regional Parameters document supported by the End-Device"
+        },
+        "SupportsJoin": {
+          "type": "boolean",
+          "description": "End-Device supports Join (OTAA) or not (ABP)"
+        },
+        "RXDelay1": {
+          "$ref": "#/definitions/rxDelay",
+          "description": "Class A RX1 delay"
+        },
+        "RXDROffset1": {
+          "$ref": "#/definitions/rxDataRateOffset",
+          "description": "RX1 data rate offset"
+        },
+        "RXDataRate2": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "RX2 data rate (bits-per-second)"
+        },
+        "RXFreq2": {
+          "$ref": "#/definitions/frequency",
+          "description": "RX2 channel frequency"
+        },
+        "FactoryPresetFreqs": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/definitions/frequency" },
+          "description": "List of factory-preset frequencies"
+        },
+        "MaxEIRP": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Maximum EIRP supported by the End-Device (dBm)"
+        },
+        "MaxDutyCycle": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "examples": [0.1],
+          "description": "Maximum duty cycle supported by the end device"
+        },
+        "RFRegion": {
+          "type": "string",
+          "enum": [
+            "EU868",
+            "US902",
+            "China779",
+            "EU433",
+            "Australia915",
+            "China470",
+            "AS923"
+          ],
+          "description": "RF region name"
+        },
+        "Supports32bitFCnt": {
+          "type": "boolean",
+          "description": "End-Device uses 32bit FCnt"
+        }
+      },
+      "additionalProperties": false,
+
+      "required": [
+        "DeviceProfileID",
+        "SupportsClassB",
+        "SupportsClassC",
+        "MACVersion",
+        "RegParamsRevision",
+        "SupportsJoin",
+        "MaxEIRP",
+        "RFRegion"
+      ],
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "SupportsClassB": { "const": true }
+            }
+          },
+          "then": {
+            "required": [
+              "ClassBTimeout",
+              "PingSlotPeriod",
+              "PingSlotDR",
+              "PingSlotFrequency"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "SupportsClassC": { "const": true }
+            }
+          },
+          "then": {
+            "required": [
+              "ClassCTimeout"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "SupportsJoin": { "const": false }
+            }
+          },
+          "then": {
+            "required": [
+              "RXDelay1",
+              "RXDROffset1",
+              "RXDataRate2",
+              "RXFreq2",
+              "FactoryPresetFreqs"
+            ]
+          }
+        }
+      ]
+    }
+  },
+
+  "anyOf": [{ "$ref": "#/definitions/deviceProfile" }],
+
+  "type": ["object", "array"]
+}
